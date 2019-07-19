@@ -1,65 +1,98 @@
 'use strict'
 
 var express = require('express')
-var todoRoutes = express.Router()
-var todo = require('./Todo')
+var feedRoutes = express.Router()
+const sqlite3 = require('sqlite3').verbose();
+let Parser = require('rss-parser');
+let parser = new Parser();
 
-// get all todo items in the db
-todoRoutes.route('/all').get(function (req, res, next) {
-  todo.find(function (err, todos) {
+// get all feed items in the db
+feedRoutes.route('/all').get(function (req, res, next) {
+  // open the database
+  let db = new sqlite3.Database('./db/feed.db');
+
+  let sql = 'SELECT * FROM feeds ORDER BY name';
+
+  db.all(sql, [], (err, feeds) => {
     if (err) {
-      return next(new Error(err))
+      res.json(err);
     }
-    res.json(todos) // return all todos
-  })
+    res.json(feeds);
+  });
+
+  // close the database connection
+  db.close();
 })
 
-// add a todo item
-todoRoutes.route('/add').post(function (req, res) {
-  todo.create(
-    {
-      name: req.body.name,
-      done: false
-    },
-    function (error, todo) {
-      if (error) {
-        res.status(400).send('Unable to create todo list')
+// add a feed item
+feedRoutes.route('/add').post(function (req, res) {
+  // open the database
+  let db = new sqlite3.Database('./db/feed.db');
+
+  let sql = 'INSERT INTO feeds (name, url, active) VALUES (?, ?, ?)';
+
+  let lastID;
+
+  db.run(sql, [req.body.name, req.body.url, req.body.active], function(err) {
+    if (err) {
+      res.json(err);
+    }
+    lastID = this.lastID;
+    res.json(this.lastID);
+  });
+
+  (async () => {
+    let feed = await parser.parseURL(req.body.url);
+    const items = feed.items.map(function (item) {
+      return item['link'];
+    });
+
+    let sqlupdate = 'UPDATE feeds SET items = ? WHERE id = ?';
+
+    db.run(sqlupdate, [items.toString(), lastID], function (err) {
+      if (err) {
+        throw err;
       }
-      res.status(200).json(todo)
-    }
-  )
+    });
+
+    // close the database connection
+    db.close();
+  })();
 })
 
-// delete a todo item
-todoRoutes.route('/delete/:id').get(function (req, res, next) {
-  var id = req.params.id
-  todo.findByIdAndRemove(id, function (err, todo) {
+// delete a feed item
+feedRoutes.route('/delete/:id').get(function (req, res, next) {
+  // open the database
+  let db = new sqlite3.Database('./db/feed.db');
+
+  let sql = 'DELETE FROM feeds WHERE id=?';
+
+  db.run(sql, req.params.id, function (err) {
     if (err) {
-      return next(new Error('Todo was not found'))
+      res.json(err);
     }
-    res.json('Successfully removed')
-  })
+    res.json('Successfully removed');
+  });
+
+  // close the database connection
+  db.close();
 })
 
-// update a todo item
-todoRoutes.route('/update/:id').post(function (req, res, next) {
-  var id = req.params.id
-  todo.findById(id, function (error, todo) {
-    if (error) {
-      return next(new Error('Todo was not found'))
-    } else {
-      todo.name = req.body.name
-      todo.done = req.body.done
-      todo.save({
-        function (error, todo) {
-          if (error) {
-            res.status(400).send('Unable to update todo')
-          } else {
-            res.status(200).json(todo)
-          }
-        }
-      })
+// update a feed item
+feedRoutes.route('/update/:id').post(function (req, res, next) {
+  // open the database
+  let db = new sqlite3.Database('./db/feed.db');
+
+  let sql = 'UPDATE feeds SET active = ? WHERE id = ?';
+
+  db.run(sql, [req.body.active, req.params.id], function (err) {
+    if (err) {
+      res.json(err);
     }
-  })
+    res.json(this.changes);
+  });
+
+  // close the database connection
+  db.close();
 })
-module.exports = todoRoutes
+module.exports = feedRoutes

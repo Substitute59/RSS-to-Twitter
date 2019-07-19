@@ -1,20 +1,23 @@
 {
-    "name": "node-todo",
+    "name": "rss-to-twitter",
     "version": "0.0.0",
-    "description": "Simple todo application.",
+    "description": "RSS to Twitter",
     "main": "server.js",
-    "author": "Samuel James",
+    "author": "Jonathan Debaere",
     "scripts": {
         "build": "webpack"
     },
     "dependencies": {
         "axios": "^0.16.2",
         "body-parser": "^1.5.2",
-        "bootstrap": "^4.0.0-beta.2",
         "express": "~4.7.2",
         "method-override": "~2.1.2",
-        "mongoose": "~4.0.0",
         "morgan": "^1.9.0",
+        "node-url-shortener": "^1.0.1",
+        "rss-parser": "^3.7.2",
+        "rss-parser-browser": "^2.2.2",
+        "sqlite3": "^4.0.9",
+        "twitter": "^1.7.1",
         "vue": "^2.5.11",
         "vue-axios": "^2.0.2"
     },

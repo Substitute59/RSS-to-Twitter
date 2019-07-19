@@ -1,11 +1,11 @@
 <template>
     <div>
-        <h2>Create a Todo List</h2>
+        <h2>Ajouter un flux RSS</h2>
         <form @submit.prevent>
-            <div class="form-group">
-                <input type="text" class="form-control" @keypress="typing=true" placeholder="What do you want to do?"
-                       v-model="todo" @keyup.enter="addTodo($event)">
-                <span class="help-block small text-center" v-show="typing">Hit enter to save</span>
+            <div>
+                <input type="text" @keypress="typing=true" placeholder="Nom" v-model="feed.name">
+                <input type="text" @keypress="typing=true" placeholder="Url" v-model="feed.url">
+                <input type="button" v-on:click="addFeed()" value="Ajouter">
             </div>
         </form>
     </div>
@@ -18,32 +18,32 @@
     export default {
         data() {
             return {
-                todo: '',
+                feed: {},
                 typing: false,
             }
         },
         methods: {
-            addTodo(event) {
-                if (event) event.preventDefault();
+            addFeed() {
                 let url = 'http://localhost:4000/api/add';
                 let param = {
-                    name: this.todo,
-                    done: 0
+                    name: this.feed.name,
+                    url: this.feed.url,
+                    active: 1
                 };
                 axios.post(url, param).then((response) => {
                     console.log(response);
-                    this.clearTodo();
-                    this.refreshTodo();
+                    this.clearFeed();
+                    this.refreshFeed();
                     this.typing = false;
                 }).catch((error) => {
                     console.log(error);
                 })
             },
-            clearTodo() {
-                this.todo = '';
+            clearFeed() {
+                this.feed = {};
             },
-            refreshTodo() {
-                bus.$emit("refreshTodo");
+            refreshFeed() {
+                bus.$emit("refreshFeed");
             }
         }
     }

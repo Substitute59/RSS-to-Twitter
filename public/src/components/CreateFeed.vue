@@ -1,14 +1,20 @@
 <template>
-    <div>
-        <h2>Ajouter un flux RSS</h2>
-        <form @submit.prevent>
-            <div>
-                <input type="text" @keypress="typing=true" placeholder="Nom" v-model="feed.name">
-                <input type="text" @keypress="typing=true" placeholder="Url" v-model="feed.url">
-                <input type="button" v-on:click="addFeed()" value="Ajouter">
-            </div>
-        </form>
-    </div>
+    <section class="section">
+        <div class="container">
+            <h2 class="subtitle">Ajouter un flux RSS</h2>
+            <form @submit.prevent>
+                <div class="field">
+                    <input class="input" type="text" @keypress="typing=true" placeholder="Nom" v-model="feed.name">
+                </div>
+                <div class="field">
+                    <input class="input" type="text" @keypress="typing=true" placeholder="Url" v-model="feed.url">
+                </div>
+                <div class="field">
+                    <input class="button" type="button" v-on:click="addFeed()" value="Ajouter">
+                </div>
+            </form>
+        </div>
+    </section>
 </template>
 
 <script>

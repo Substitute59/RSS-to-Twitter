@@ -43,40 +43,42 @@ setInterval(() => {
             res.json(err);
         }
         feeds.forEach((flux) => {
-            (async () => {
-                let feed = await parser.parseURL(flux.url);
-                feed.items.forEach(item => {
-                    if (flux.items) {
-                        if (flux.items.indexOf(item.link) < 0) {
-                            shortUrl.short(item.link, function (err, url) {
-                                client.post('statuses/update', {
-                                    status: `${item.title} ${url}`
-                                }, function (error, tweet, response) {
-                                    if (error) throw error;
-                                    console.log(tweet); // Tweet body
+            if (flux.active) {
+                (async () => {
+                    let feed = await parser.parseURL(flux.url);
+                    feed.items.forEach(item => {
+                        if (flux.items) {
+                            if (flux.items.indexOf(item.link) < 0) {
+                                shortUrl.short(item.link, function (err, url) {
+                                    client.post('statuses/update', {
+                                        status: `${item.title} ${url}`
+                                    }, function (error, tweet, response) {
+                                        if (error) throw error;
+                                        console.log(tweet); // Tweet body
+                                    });
+
+                                    let db = new sqlite3.Database('./db/feed.db');
+
+                                    const items = feed.items.map(function (item) {
+                                        return item['link'];
+                                    });
+
+                                    let sqlupdate = 'UPDATE feeds SET items = ? WHERE id = ?';
+
+                                    db.run(sqlupdate, [items.toString(), flux.id], function (err) {
+                                        if (err) {
+                                            throw err;
+                                        }
+                                    });
+
+                                    // close the database connection
+                                    db.close();
                                 });
-
-                                let db = new sqlite3.Database('./db/feed.db');
-
-                                const items = feed.items.map(function (item) {
-                                    return item['link'];
-                                });
-
-                                let sqlupdate = 'UPDATE feeds SET items = ? WHERE id = ?';
-
-                                db.run(sqlupdate, [items.toString(), flux.id], function (err) {
-                                    if (err) {
-                                        throw err;
-                                    }
-                                });
-
-                                // close the database connection
-                                db.close();
-                            });
+                            }
                         }
-                    }
-                });
-            })();
+                    });
+                })();
+            }
         });
     });
 

@@ -1,12 +1,15 @@
 <template>
     <div id="app">
-        <div>
-            <div>
-                <create-feed></create-feed>
-                <div>
-                    <list-feed></list-feed>
+        <div class="container">
+            <section class="hero">
+                <div class="hero-body">
+                    <div class="container">
+                        <h1 class="title has-text-centered">RSS to Twitter</h1>
+                    </div>
                 </div>
-            </div>
+            </section>
+            <create-feed></create-feed>
+            <list-feed></list-feed>
         </div>
     </div>
 </template>

@@ -10,7 +10,7 @@
     "dependencies": {
         "axios": "^0.16.2",
         "body-parser": "^1.5.2",
-        "express": "~4.7.2",
+        "express": "~4.17.3",
         "method-override": "~2.1.2",
         "morgan": "^1.9.0",
         "node-url-shortener": "^1.0.1",
